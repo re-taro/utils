@@ -4,3 +4,5 @@ node_modules
 package.json
 tsconfig.json
 pnpm-lock.yaml
+.eslintrc.yml
+renovate.json
