@@ -1,0 +1,68 @@
+{
+  "name": "@re-taro/utils",
+  "version": "0.0.1",
+  "description": "Opinionated collection of common JavaScript / TypeScript utils",
+  "keywords": [
+    "utils"
+  ],
+  "homepage": "https://github.com/re-taro/utils#readme",
+  "bugs": {
+    "url": "https://github.com/re-taro/utils/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Rintaro Itokawa",
+    "email": "me@re-taro.dev",
+    "url": "https://re-taro.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/re-taro/utils.git"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "npm run build --watch",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run build",
+    "release": "bumpp --commit --push --tag && npm publish",
+    "start": "esno src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "3.1.9",
+    "@rollup/plugin-commonjs": "22.0.0",
+    "@rollup/plugin-json": "4.1.0",
+    "@rollup/plugin-node-resolve": "13.3.0",
+    "@types/node": "17.0.42",
+    "@types/throttle-debounce": "5.0.0",
+    "bumpp": "7.1.1",
+    "esbuild": "0.14.43",
+    "eslint": "8.17.0",
+    "eslint-config-re-taro": "1.1.3",
+    "esno": "0.16.3",
+    "p-limit": "4.0.0",
+    "rollup": "2.75.6",
+    "rollup-plugin-dts": "4.2.2",
+    "rollup-plugin-esbuild": "4.9.1",
+    "throttle-debounce": "5.0.0",
+    "typescript": "4.7.3",
+    "vite": "2.9.12",
+    "vitest": "0.14.2"
+  }
+}
