@@ -1,3 +1,6 @@
 dist
 node_modules
 *.d.ts
+package.json
+tsconfig.json
+pnpm-lock.yaml
