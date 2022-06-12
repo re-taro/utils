@@ -316,6 +316,8 @@ Sessionx.vim
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+dist
+*.d.ts
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
