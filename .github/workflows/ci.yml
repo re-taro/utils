@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
@@ -18,16 +17,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-
       - name: Setup
         run: npm i -g @antfu/ni
-
       - name: Install
         run: nci
-
       - name: Lint
         run: nr lint
-
   typecheck:
     runs-on: ubuntu-latest
     steps:
