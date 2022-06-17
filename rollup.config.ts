@@ -1,50 +1,110 @@
-import alias from '@rollup/plugin-alias'
-import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
-import resolve from '@rollup/plugin-node-resolve'
-import dts from 'rollup-plugin-dts'
-import esbuild from 'rollup-plugin-esbuild'
+import * as path from 'node:path'
+import { babel as pluginBabel } from '@rollup/plugin-babel'
+import pluginCommonjs from '@rollup/plugin-commonjs'
+import pluginNodeResolve from '@rollup/plugin-node-resolve'
+import pluginTypescript from '@rollup/plugin-typescript'
+import camelCase from 'lodash.camelcase'
+import upperFirst from 'lodash.upperfirst'
+import pluginDts from 'rollup-plugin-dts'
+import { terser as pluginTerser } from 'rollup-plugin-terser'
+import package_ from './package.json'
 
-const entries = ['src/index.ts']
+const moduleName = upperFirst(camelCase(package_.name.replace(/^@.*\//, '')))
 
-const plugins = [
-  alias({
-    // eslint-disable-next-line prefer-named-capture-group, require-unicode-regexp
-    entries: [{ find: /^node:(.+)$/, replacement: '$1' }]
-  }),
-  resolve({
-    preferBuiltins: true
-  }),
-  json(),
-  commonjs(),
-  esbuild({
-    target: 'node14'
-  })
-]
+const banner = `/*!
+  ${moduleName}.js v${package_.version}
+  ${package_.homepage}
+  Released under the ${package_.license} License.
+*/`
+
+const BABELRC = '.babelrc.js'
 
 export default [
-  ...entries.map((input) => ({
-    external: [],
-    input,
+  {
+    input: 'src/index.ts',
     output: [
       {
-        file: input.replace('src/', 'dist/').replace('.ts', '.mjs'),
-        format: 'esm'
+        banner,
+        file: package_.browser,
+        format: 'iife',
+        name: moduleName,
+        sourcemap: 'inline',
       },
       {
-        file: input.replace('src/', 'dist/').replace('.ts', '.cjs'),
-        format: 'cjs'
-      }
+        banner,
+        file: package_.browser.replace('.js', '.min.js'),
+        format: 'iife',
+        name: moduleName,
+        plugins: [pluginTerser()],
+      },
     ],
-    plugins
-  })),
-  ...entries.map((input) => ({
+    plugins: [
+      pluginTypescript(),
+      pluginCommonjs({
+        extensions: ['.js', '.ts'],
+      }),
+      pluginBabel({
+        babelHelpers: 'bundled',
+        configFile: path.resolve(__dirname, BABELRC),
+      }),
+      pluginNodeResolve({
+        browser: true,
+      }),
+    ],
+  },
+  {
+    external: [
+      ...Object.keys(package_.devDependencies || {}),
+    ],
+    input: 'src/index.ts',
+    output: [
+      {
+        banner,
+        exports: 'named',
+        file: package_.module,
+        format: 'esm',
+        sourcemap: 'inline',
+      },
+    ],
+    plugins: [
+      pluginTypescript(),
+      pluginBabel({
+        babelHelpers: 'bundled',
+        configFile: path.resolve(__dirname, BABELRC),
+      }),
+    ],
+  },
+  {
+    external: [
+      ...Object.keys(package_.devDependencies || {}),
+    ],
+    input: 'src/index.ts',
+    output: [
+      {
+        banner,
+        file: package_.main,
+        format: 'cjs',
+        sourcemap: 'inline',
+      },
+    ],
+    plugins: [
+      pluginTypescript(),
+      pluginBabel({
+        babelHelpers: 'bundled',
+        configFile: path.resolve(__dirname, BABELRC),
+      }),
+    ],
+  },
+  {
     external: [],
-    input,
-    output: {
-      file: input.replace('src/', '').replace('.ts', '.d.ts'),
-      format: 'esm'
-    },
-    plugins: [dts({ respectExternal: true })]
-  }))
+    input: 'src/index.ts',
+    output: [
+      {
+        banner,
+        file: package_.types,
+        format: 'esm',
+      },
+    ],
+    plugins: [pluginDts({ respectExternal: true })],
+  },
 ]

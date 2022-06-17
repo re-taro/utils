@@ -1,8 +1,4 @@
-extends:
-  - "re-taro"
-  - "re-taro/typescript"
+extends: "@antfu"
 rules:
   "@typescript-eslint/ban-ts-comment": off
   "@typescript-eslint/prefer-ts-expect-error": off
-parserOptions:
-  project: ./tsconfig.json

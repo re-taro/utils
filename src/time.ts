@@ -1,1 +1,1 @@
-export const timestamp = () => Number(Date.now())
+export const timestamp = () => +Date.now()

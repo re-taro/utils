@@ -6,12 +6,10 @@ import type { Arrayable, Nullable } from './types'
  *
  * @category Array
  */
-const toArray = <T>(array?: Nullable<Arrayable<T>>): Array<T> => {
-  // eslint-disable-next-line no-param-reassign
+export function toArray<T>(array?: Nullable<Arrayable<T>>): Array<T> {
   array = array || []
-  if (Array.isArray(array)) {
+  if (Array.isArray(array))
     return array
-  }
   return [array]
 }
 
@@ -20,18 +18,20 @@ const toArray = <T>(array?: Nullable<Arrayable<T>>): Array<T> => {
  *
  * @category Array
  */
-const flattenArrayable = <T>(array?: Nullable<Arrayable<T | Array<T>>>): Array<T> => toArray(array).flat(1) as Array<T>
+export function flattenArrayable<T>(array?: Nullable<Arrayable<T | Array<T>>>): Array<T> {
+  return toArray(array).flat(1) as Array<T>
+}
 
 /**
  * Use rest arguments to merge arrays
  *
  * @category Array
  */
-// eslint-disable-next-line max-len
-const mergeArrayable = <T>(...arguments_: Nullable<Arrayable<T>>[]): Array<T> => arguments_.flatMap((index) => toArray(index))
+export function mergeArrayable<T>(...args: Nullable<Arrayable<T>>[]): Array<T> {
+  return args.flatMap(i => toArray(i))
+}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PartitionFilter<T> = (index: T, index_: number, array: readonly T[]) => any
+export type PartitionFilter<T> = (i: T, idx: number, arr: readonly T[]) => any
 
 /**
  * Divide an array into two parts by a filter function
@@ -39,25 +39,25 @@ export type PartitionFilter<T> = (index: T, index_: number, array: readonly T[])
  * @category Array
  * @example const [odd, even] = partition([1, 2, 3, 4], i => i % 2 != 0)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const partition = <T>(array: readonly T[], ...filters: PartitionFilter<T>[]): any => {
-  // eslint-disable-next-line unicorn/no-null
-  const result: T[][] = Array.from({ length: filters.length + 1 }).fill(null)
-    .map(() => [])
-  // eslint-disable-next-line unicorn/no-array-for-each
-  array.forEach((event, index, array_) => {
-    // eslint-disable-next-line no-underscore-dangle
-    let index_ = 0
+export function partition<T>(array: readonly T[], f1: PartitionFilter<T>): [T[], T[]]
+export function partition<T>(array: readonly T[], f1: PartitionFilter<T>, f2: PartitionFilter<T>): [T[], T[], T[]]
+export function partition<T>(array: readonly T[], f1: PartitionFilter<T>, f2: PartitionFilter<T>, f3: PartitionFilter<T>): [T[], T[], T[], T[]]
+export function partition<T>(array: readonly T[], f1: PartitionFilter<T>, f2: PartitionFilter<T>, f3: PartitionFilter<T>, f4: PartitionFilter<T>): [T[], T[], T[], T[], T[]]
+export function partition<T>(array: readonly T[], f1: PartitionFilter<T>, f2: PartitionFilter<T>, f3: PartitionFilter<T>, f4: PartitionFilter<T>, f5: PartitionFilter<T>): [T[], T[], T[], T[], T[], T[]]
+export function partition<T>(array: readonly T[], f1: PartitionFilter<T>, f2: PartitionFilter<T>, f3: PartitionFilter<T>, f4: PartitionFilter<T>, f5: PartitionFilter<T>, f6: PartitionFilter<T>): [T[], T[], T[], T[], T[], T[], T[]]
+export function partition<T>(array: readonly T[], ...filters: PartitionFilter<T>[]): any {
+  const result: T[][] = new Array(filters.length + 1).fill(null).map(() => [])
+
+  array.forEach((e, idx, arr) => {
+    let i = 0
     for (const filter of filters) {
-      if (filter(event, index, array_)) {
-        // eslint-disable-next-line security/detect-object-injection, no-underscore-dangle
-        result[index_].push(event)
+      if (filter(e, idx, arr)) {
+        result[i].push(e)
         return
       }
-      index_ += 1
+      i += 1
     }
-    // eslint-disable-next-line security/detect-object-injection, no-underscore-dangle
-    result[index_].push(event)
+    result[i].push(e)
   })
   return result
 }
@@ -67,24 +67,29 @@ const partition = <T>(array: readonly T[], ...filters: PartitionFilter<T>[]): an
  *
  * @category Array
  */
-const uniq = <T>(array: readonly T[]): T[] => [...new Set(array)]
+export function uniq<T>(array: readonly T[]): T[] {
+  return Array.from(new Set(array))
+}
 
 /**
  * Get last item
  *
  * @category Array
  */
-const last = <T>(array: readonly T[]): T | undefined => at(array, -1)
+export function last(array: readonly []): undefined
+export function last<T>(array: readonly T[]): T
+export function last<T>(array: readonly T[]): T | undefined {
+  return at(array, -1)
+}
 
 /**
  * Remove an item from Array
  *
  * @category Array
  */
-const remove = <T>(array: T[], value: T) => {
-  if (!array) {
+export function remove<T>(array: T[], value: T) {
+  if (!array)
     return false
-  }
   const index = array.indexOf(value)
   if (index >= 0) {
     array.splice(index, 1)
@@ -98,17 +103,16 @@ const remove = <T>(array: T[], value: T) => {
  *
  * @category Array
  */
-const at = <T>(array: readonly T[] | [], index: number): T | undefined => {
-  const { length } = array
-  if (!length) {
-    // eslint-disable-next-line no-undefined
+export function at(array: readonly [], index: number): undefined
+export function at<T>(array: readonly T[], index: number): T
+export function at<T>(array: readonly T[] | [], index: number): T | undefined {
+  const len = array.length
+  if (!len)
     return undefined
-  }
-  if (index < 0) {
-    // eslint-disable-next-line no-param-reassign
-    index += length
-  }
-  // eslint-disable-next-line security/detect-object-injection
+
+  if (index < 0)
+    index += len
+
   return array[index]
 }
 
@@ -117,40 +121,41 @@ const at = <T>(array: readonly T[] | [], index: number): T | undefined => {
  *
  * @category Array
  */
-// eslint-disable-next-line max-statements, @typescript-eslint/no-explicit-any
-const range = (...arguments_: any): number[] => {
-  // eslint-disable-next-line init-declarations
-  let start: number, step: number, stop: number
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (arguments_.length === 1) {
+export function range(stop: number): number[]
+export function range(start: number, stop: number, step?: number): number[]
+export function range(...args: any): number[] {
+  let start: number, stop: number, step: number
+
+  if (args.length === 1) {
     start = 0
     step = 1;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    ([stop] = arguments_)
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    ([start, stop, step = 1] = arguments_)
+    ([stop] = args)
   }
-  const array: number[] = []
+  else {
+    ([start, stop, step = 1] = args)
+  }
+
+  const arr: number[] = []
   let current = start
   while (current < stop) {
-    array.push(current)
+    arr.push(current)
     current += step || 1
   }
-  return array
+
+  return arr
 }
 
 /**
  * Move element in an Array
  *
  * @category Array
- * @param array
+ * @param arr
  * @param from
  * @param to
  */
-const move = <T>(array: T[], from: number, to: number) => {
-  array.splice(to, 0, array.splice(from, 1)[0])
-  return array
+export function move<T>(arr: T[], from: number, to: number) {
+  arr.splice(to, 0, arr.splice(from, 1)[0])
+  return arr
 }
 
 /**
@@ -158,44 +163,28 @@ const move = <T>(array: T[], from: number, to: number) => {
  *
  * @category Array
  */
-const clampArrayRange = (number_: number, array: readonly unknown[]) => clamp(number_, 0, array.length - 1)
+export function clampArrayRange(n: number, arr: readonly unknown[]) {
+  return clamp(n, 0, arr.length - 1)
+}
 
 /**
  * Get random items from an array
  *
  * @category Array
  */
-// eslint-disable-next-line max-len
-const sample = <T>(array: T[], count: number) => Array.from({ length: count }, () => array[Math.round(Math.random() * (array.length - 1))])
+export function sample<T>(arr: T[], count: number) {
+  return Array.from({ length: count }, _ => arr[Math.round(Math.random() * (arr.length - 1))])
+}
 
 /**
  * Shuffle an array. This function mutates the array.
  *
  * @category Array
  */
-const shuffle = <T>(array: T[]): T[] => {
-  // eslint-disable-next-line no-plusplus
-  for (let index = array.length - 1; index > 0; index--) {
-    // eslint-disable-next-line no-underscore-dangle
-    const index_ = Math.floor(Math.random() * (index + 1));
-    // eslint-disable-next-line no-underscore-dangle, security/detect-object-injection
-    [array[index], array[index_]] = [array[index_], array[index]]
+export function shuffle<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]
   }
   return array
-}
-
-export {
-  toArray,
-  flattenArrayable,
-  mergeArrayable,
-  partition,
-  uniq,
-  last,
-  remove,
-  at,
-  range,
-  move,
-  clampArrayRange,
-  sample,
-  shuffle
 }
