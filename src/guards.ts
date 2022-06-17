@@ -4,8 +4,9 @@
  * @category Guards
  * @example array.filter(notNullish)
  */
-// eslint-disable-next-line id-length
-const notNullish = <T>(v: T | null | undefined): v is NonNullable<T> => v !== null
+export function notNullish<T>(v: T | null | undefined): v is NonNullable<T> {
+  return v != null
+}
 
 /**
  * Type guard to filter out null values
@@ -13,8 +14,9 @@ const notNullish = <T>(v: T | null | undefined): v is NonNullable<T> => v !== nu
  * @category Guards
  * @example array.filter(noNull)
  */
-// eslint-disable-next-line id-length
-const noNull = <T>(v: T | null): v is Exclude<T, null> => v !== null
+export function noNull<T>(v: T | null): v is Exclude<T, null> {
+  return v !== null
+}
 
 /**
  * Type guard to filter out null-ish values
@@ -22,8 +24,9 @@ const noNull = <T>(v: T | null): v is Exclude<T, null> => v !== null
  * @category Guards
  * @example array.filter(notUndefined)
  */
-// eslint-disable-next-line id-length, no-undefined
-const notUndefined = <T>(v: T): v is Exclude<T, undefined> => v !== undefined
+export function notUndefined<T>(v: T): v is Exclude<T, undefined> {
+  return v !== undefined
+}
 
 /**
  * Type guard to filter out falsy values
@@ -31,12 +34,6 @@ const notUndefined = <T>(v: T): v is Exclude<T, undefined> => v !== undefined
  * @category Guards
  * @example array.filter(isTruthy)
  */
-// eslint-disable-next-line id-length, unicorn/prefer-native-coercion-functions
-const isTruthy = <T>(v: T): v is NonNullable<T> => Boolean(v)
-
-export {
-  notNullish,
-  noNull,
-  notUndefined,
-  isTruthy
+export function isTruthy<T>(v: T): v is NonNullable<T> {
+  return Boolean(v)
 }

@@ -1,11 +1,9 @@
 import { flattenArrayable } from './array'
 
-const clamp = (number_: number, min: number, max: number) => Math.min(max, Math.max(min, number_))
+export function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n))
+}
 
-// eslint-disable-next-line id-length
-const sum = (...arguments_: number[] | number[][]) => flattenArrayable(arguments_).reduce((a, b) => a + b, 0)
-
-export {
-  clamp,
-  sum
+export function sum(...args: number[] | number[][]) {
+  return flattenArrayable(args).reduce((a, b) => a + b, 0)
 }

@@ -1,17 +1,18 @@
-import type { Fnc, Nullable } from './types'
+import type { Fn, Nullable } from './types'
 
 /**
  * Call every function in an array
  */
-const batchInvoke = (functions: Nullable<Fnc>[]) => {
-  // eslint-disable-next-line no-underscore-dangle
-  for (const function_ of functions) function_ && function_()
+export function batchInvoke(functions: Nullable<Fn>[]) {
+  functions.forEach(fn => fn && fn())
 }
 
 /**
  * Call the function
  */
-const invoke = (function_: Fnc) => function_()
+export function invoke(fn: Fn) {
+  return fn()
+}
 
 /**
  * Pass the value through the callback, and return the value
@@ -25,13 +26,7 @@ const invoke = (function_: Fnc) => function_()
  * }
  * ```
  */
-const tap = <T>(value: T, callback: (value_: T) => void): T => {
+export function tap<T>(value: T, callback: (value: T) => void): T {
   callback(value)
   return value
-}
-
-export {
-  batchInvoke,
-  invoke,
-  tap
 }

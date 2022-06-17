@@ -3,17 +3,19 @@
  *
  * @category String
  */
-// eslint-disable-next-line require-unicode-regexp
-const slash = (string_: string) => string_.replace(/\\/g, '/')
+export function slash(str: string) {
+  return str.replace(/\\/g, '/')
+}
 
 /**
  * Ensure prefix of a string
  *
  * @category String
  */
-const ensurePrefix = (prefix: string, string_: string) => {
-  if (!string_.startsWith(prefix)) return prefix + string_
-  return string_
+export function ensurePrefix(prefix: string, str: string) {
+  if (!str.startsWith(prefix))
+    return prefix + str
+  return str
 }
 
 /**
@@ -21,9 +23,10 @@ const ensurePrefix = (prefix: string, string_: string) => {
  *
  * @category String
  */
-const ensureSuffix = (suffix: string, string_: string) => {
-  if (!string_.endsWith(suffix)) return string_ + suffix
-  return string_
+export function ensureSuffix(suffix: string, str: string) {
+  if (!str.endsWith(suffix))
+    return str + suffix
+  return str
 }
 
 /**
@@ -39,41 +42,27 @@ const ensureSuffix = (suffix: string, string_: string) => {
  * ) // Hello Inès! My name is Anthony.
  * ```
  */
-// eslint-disable-next-line max-len
-// eslint-disable-next-line unicorn/better-regex, prefer-named-capture-group, require-unicode-regexp, @typescript-eslint/no-explicit-any
-const template = (string_: string, ...arguments_: any[]): string => string_.replace(/\{(\d+)\}/g, (match, key) => {
-  const index = Number(key)
-  if (Number.isNaN(index)) {
-    return match
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, security/detect-object-injection
-  return arguments_[index]
-})
+export function template(str: string, ...args: any[]): string {
+  return str.replace(/{(\d+)}/g, (match, key) => {
+    const index = Number(key)
+    if (Number.isNaN(index))
+      return match
+    return args[index]
+  })
+}
 
-/*
- * Port from nanoid
- * https://github.com/ai/nanoid
- */
-// eslint-disable-next-line no-secrets/no-secrets
+// port from nanoid
+// https://github.com/ai/nanoid
 const urlAlphabet = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
-
 /**
  * Generate a random string
  * @category String
  */
-const randomString = (size = 16, dict = urlAlphabet) => {
+export function randomStr(size = 16, dict = urlAlphabet) {
   let id = ''
-  let index = size
-  const { length } = dict
-  // eslint-disable-next-line no-plusplus, max-statements-per-line
-  while (index--) { id += dict[Math.trunc(Math.random() * length)] }
+  let i = size
+  const len = dict.length
+  while (i--)
+    id += dict[(Math.random() * len) | 0]
   return id
-}
-
-export {
-  slash,
-  ensurePrefix,
-  ensureSuffix,
-  template,
-  randomString
 }

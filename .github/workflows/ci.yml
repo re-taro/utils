@@ -36,7 +36,7 @@ jobs:
       - name: Install
         run: nci
       - name: Typecheck
-        run: nr typecheck
+        run: nr type
   test:
     runs-on: ${{ matrix.os }}
     strategy:

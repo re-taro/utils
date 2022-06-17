@@ -1,9 +1,8 @@
 import { remove } from './array'
-import type { Fnc } from './types'
+import type { Fn } from './types'
 
 export interface SingletonPromiseReturn<T> {
   (): Promise<T>
-
   /**
    * Reset current staled promise.
    * Await it to have proper shutdown.
@@ -16,19 +15,18 @@ export interface SingletonPromiseReturn<T> {
  *
  * @category Promise
  */
-const createSingletonPromise = <T>(function_: () => Promise<T>): SingletonPromiseReturn<T> => {
-  // eslint-disable-next-line no-underscore-dangle, init-declarations
+export function createSingletonPromise<T>(fn: () => Promise<T>): SingletonPromiseReturn<T> {
   let _promise: Promise<T> | undefined
-  const wrapper = () => {
-    if (!_promise) _promise = function_()
+  function wrapper() {
+    if (!_promise)
+      _promise = fn()
     return _promise
   }
   wrapper.reset = async () => {
-    // eslint-disable-next-line no-underscore-dangle
-    const _previous = _promise
-    // eslint-disable-next-line no-undefined
+    const _prev = _promise
     _promise = undefined
-    if (_previous) await _previous
+    if (_prev)
+      await _prev
   }
   return wrapper
 }
@@ -38,12 +36,14 @@ const createSingletonPromise = <T>(function_: () => Promise<T>): SingletonPromis
  *
  * @category Promise
  */
-// eslint-disable-next-line max-len
-// eslint-disable-next-line @typescript-eslint/no-misused-promises, no-promise-executor-return, @typescript-eslint/no-explicit-any
-const sleep = (ms: number, callback?: Fnc<any>) => new Promise<void>((resolve) => setTimeout(async () => {
-  await callback?.()
-  resolve()
-}, ms))
+export function sleep(ms: number, callback?: Fn<any>) {
+  return new Promise<void>(resolve =>
+    setTimeout(async () => {
+      await callback?.()
+      resolve()
+    }, ms),
+  )
+}
 
 /**
  * Create a promise lock
@@ -61,28 +61,28 @@ const sleep = (ms: number, callback?: Fnc<any>) => new Promise<void>((resolve) =
  * await lock.wait() // it will wait all tasking finished
  * ```
  */
-const createPromiseLock = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createPromiseLock() {
   const locks: Promise<any>[] = []
   return {
-    clear () {
-      locks.length = 0
-    },
-    isWaiting () {
-      return locks.length > 0
-    },
-    async run<T = void> (function_: () => Promise<T>): Promise<T> {
-      const value = function_()
-      locks.push(value)
+    async run<T = void>(fn: () => Promise<T>): Promise<T> {
+      const p = fn()
+      locks.push(p)
       try {
-        return await value
-      } finally {
-        remove(locks, value)
+        return await p
+      }
+      finally {
+        remove(locks, p)
       }
     },
-    async wait (): Promise<void> {
+    async wait(): Promise<void> {
       await Promise.allSettled(locks)
-    }
+    },
+    isWaiting() {
+      return Boolean(locks.length)
+    },
+    clear() {
+      locks.length = 0
+    },
   }
 }
 
@@ -91,7 +91,6 @@ const createPromiseLock = () => {
  */
 export interface ControlledPromise<T = void> extends Promise<T> {
   resolve(value: T | PromiseLike<T>): void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reject(reason?: any): void
 }
 
@@ -109,23 +108,13 @@ export interface ControlledPromise<T = void> extends Promise<T> {
  * promise.resolve(data)
  * ```
  */
-const createControlledPromise = <T>(): ControlledPromise<T> => {
-  // eslint-disable-next-line init-declarations, @typescript-eslint/no-explicit-any
-  let reject: any, resolve: any
+export function createControlledPromise<T>(): ControlledPromise<T> {
+  let resolve: any, reject: any
   const promise = new Promise<T>((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
   }) as ControlledPromise<T>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   promise.resolve = resolve
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   promise.reject = reject
   return promise
-}
-
-export {
-  createSingletonPromise,
-  sleep,
-  createPromiseLock,
-  createControlledPromise
 }

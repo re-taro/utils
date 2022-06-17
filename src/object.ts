@@ -1,98 +1,130 @@
+import { notNullish } from './guards'
 import { isObject } from './is'
 import type { DeepMerge } from './types'
+
+/**
+ * Map key/value pairs for an object, and construct a new one
+ *
+ *
+ * @category Object
+ *
+ * Transform:
+ * @example
+ * ```
+ * objectMap({ a: 1, b: 2 }, (k, v) => [k.toString().toUpperCase(), v.toString()])
+ * // { A: '1', B: '2' }
+ * ```
+ *
+ * Swap key/value:
+ * @example
+ * ```
+ * objectMap({ a: 1, b: 2 }, (k, v) => [v, k])
+ * // { 1: 'a', 2: 'b' }
+ * ```
+ *
+ * Filter keys:
+ * @example
+ * ```
+ * objectMap({ a: 1, b: 2 }, (k, v) => k === 'a' ? undefined : [k, v])
+ * // { b: 2 }
+ * ```
+ */
+export function objectMap<K extends string, V, NK = K, NV = V>(obj: Record<K, V>, fn: (key: K, value: V) => [NK, NV] | undefined): Record<K, V> {
+  return Object.fromEntries(
+    Object.entries(obj)
+      .map(([k, v]) => fn(k as K, v as V))
+      .filter(notNullish),
+  )
+}
 
 /**
  * Type guard for any key, `k`.
  * Marks `k` as a key of `T` if `k` is in `obj`.
  *
  * @category Object
- * @param object object to query for key `k`
- * @param key key to check existence in `obj`
+ * @param obj object to query for key `k`
+ * @param k key to check existence in `obj`
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isKeyOf = <T extends object> (object: T, key: keyof any): key is keyof T => key in object
+export function isKeyOf<T extends object>(obj: T, k: keyof any): k is keyof T {
+  return k in obj
+}
 
 /**
  * Strict typed `Object.keys`
  *
  * @category Object
  */
-const objectKeys = <T extends object> (object: T) => Object.keys(object) as Array<keyof T>
+export function objectKeys<T extends object>(obj: T) {
+  return Object.keys(obj) as Array<keyof T>
+}
 
 /**
  * Strict typed `Object.entries`
  *
  * @category Object
  */
-const objectEntries = <T extends object> (object: T) => Object.entries(object) as Array<[keyof T, T[keyof T]]>
+export function objectEntries<T extends object>(obj: T) {
+  return Object.entries(obj) as Array<[keyof T, T[keyof T]]>
+}
 
 /**
  * Deep merge :P
  *
  * @category Object
  */
-// eslint-disable-next-line max-statements
-const deepMerge = <T extends object = object, S extends object = T> (target: T, ...sources: S[]): DeepMerge<T, S> => {
-  if (sources.length === 0) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+export function deepMerge<T extends object = object, S extends object = T>(target: T, ...sources: S[]): DeepMerge<T, S> {
+  if (!sources.length)
     return target as any
-  }
   const source = sources.shift()
-  // eslint-disable-next-line no-undefined
-  if (source === undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+  if (source === undefined)
     return target as any
-  }
   if (isMergableObject(target) && isMergableObject(source)) {
-    for (const key of objectKeys(source)) {
-      // eslint-disable-next-line security/detect-object-injection
+    objectKeys(source).forEach((key) => {
       if (isMergableObject(source[key])) {
         // @ts-expect-error
-        // eslint-disable-next-line security/detect-object-injection
-        if (!target[key]) {
+        if (!target[key])
           // @ts-expect-error
-          // eslint-disable-next-line security/detect-object-injection
           target[key] = {}
-        }
         // @ts-expect-error
-        // eslint-disable-next-line security/detect-object-injection
         deepMerge(target[key], source[key])
-      } else {
+      }
+      else {
         // @ts-expect-error
-        // eslint-disable-next-line security/detect-object-injection
         target[key] = source[key]
       }
-    }
+    })
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return deepMerge(target, ...sources)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
-const isMergableObject = (item: any): item is Object => isObject(item) && !Array.isArray(item)
+function isMergableObject(item: any): item is Object {
+  return isObject(item) && !Array.isArray(item)
+}
 
 /**
  * Create a new subset object by giving keys
  *
  * @category Object
  */
-// eslint-disable-next-line unicorn/no-array-reduce, id-length
-const objectPick = <O, T extends keyof O>(object: O, keys: T[], omitUndefined = false) => keys.reduce((n, k) => {
-  // eslint-disable-next-line no-undefined, security/detect-object-injection
-  if (k in object && (!omitUndefined || object[k] !== undefined)) n[k] = object[k]
-  return n
-}, {} as Pick<O, T>)
+export function objectPick<O, T extends keyof O>(obj: O, keys: T[], omitUndefined = false) {
+  return keys.reduce((n, k) => {
+    if (k in obj) {
+      if (!omitUndefined || obj[k] !== undefined)
+        n[k] = obj[k]
+    }
+    return n
+  }, {} as Pick<O, T>)
+}
 
 /**
  * Clear undefined fields from an object. It mutates the object
  *
  * @category Object
  */
-const clearUndefined = <T extends object>(object: T): T => {
+export function clearUndefined<T extends object>(obj: T): T {
   // @ts-expect-error
-  // eslint-disable-next-line security/detect-object-injection, no-undefined, unicorn/no-array-for-each
-  Object.keys(object).forEach((key: string) => (object[key] === undefined ? delete object[key] : {}))
-  return object
+  Object.keys(obj).forEach((key: string) => (obj[key] === undefined ? delete obj[key] : {}))
+  return obj
 }
 
 /**
@@ -101,20 +133,8 @@ const clearUndefined = <T extends object>(object: T): T => {
  * @see https://eslint.org/docs/rules/no-prototype-builtins
  * @category Object
  */
-const hasOwnProperty = <T>(object: T, value: PropertyKey) => {
-  if (object === null) {
+export function hasOwnProperty<T>(obj: T, v: PropertyKey) {
+  if (obj == null)
     return false
-  }
-  // eslint-disable-next-line prefer-object-has-own
-  return Object.prototype.hasOwnProperty.call(object, value)
-}
-
-export {
-  isKeyOf,
-  objectKeys,
-  objectEntries,
-  deepMerge,
-  objectPick,
-  clearUndefined,
-  hasOwnProperty
+  return Object.prototype.hasOwnProperty.call(obj, v)
 }
